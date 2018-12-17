@@ -24,8 +24,8 @@ x_test = x_test.astype('float32')
 #z-score
 mean = np.mean(x_train,axis=(0,1,2,3))
 std = np.std(x_train,axis=(0,1,2,3))
-x_train = (x_train-mean)/(std+1e-7)
-x_test = (x_test-mean)/(std+1e-7)
+x_train = x_train/255
+x_test = x_test/255
  
 num_classes = 10
 y_train = np_utils.to_categorical(y_train,num_classes)
@@ -33,38 +33,39 @@ y_test = np_utils.to_categorical(y_test,num_classes)
  
 weight_decay = 1e-4
 model = Sequential()
-model.add(Conv2D(32, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay), input_shape=x_train.shape[1:]))
-model.add(Activation('elu'))
+model.add(Conv2D(32, (3,3), padding='same', input_shape=x_train.shape[1:]))
+model.add(Activation('relu'))
 model.add(BatchNormalization())
-model.add(Conv2D(32, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
-model.add(Activation('elu'))
+model.add(Conv2D(32, (3,3), padding='same'))
+model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 #model.add(Dropout(0.2))
  
-model.add(Conv2D(64, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
-model.add(Activation('elu'))
+model.add(Conv2D(64, (3,3), padding='same'))
+model.add(Activation('relu'))
 model.add(BatchNormalization())
-model.add(Conv2D(64, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
-model.add(Activation('elu'))
+model.add(Conv2D(64, (3,3), padding='same'))
+model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
-#model.add(Dropout(0.3))
+model.add(Dropout(0.3))
  
-model.add(Conv2D(128, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
-model.add(Activation('elu'))
+model.add(Conv2D(128, (3,3), padding='same'))
+model.add(Activation('relu'))
 model.add(BatchNormalization())
-model.add(Conv2D(128, (3,3), padding='same', kernel_regularizer=regularizers.l2(weight_decay)))
-model.add(Activation('elu'))
-model.add(BatchNormalization())
+model.add(Conv2D(128, (3,3), padding='same'))
+model.add(Activation('relu'))
+#model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
 #model.add(Dropout(0.4))
  
 model.add(Flatten())
+model.add(Dense(1024, activation='relu'))
+model.add(Dropout(0.3))
 model.add(Dense(num_classes, activation='softmax'))
  
 model.summary()
- 
 #data augmentation
 datagen = ImageDataGenerator(
     rotation_range=15,
@@ -86,7 +87,7 @@ model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),\
 model_json = model.to_json()
 with open('model.json', 'w') as json_file:
     json_file.write(model_json)
-model.save('model.h5') 
+model.save('model_remove_kernel_re.h5') 
  
 #testing
 scores = model.evaluate(x_test, y_test, batch_size=128, verbose=1)
