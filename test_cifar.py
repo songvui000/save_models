@@ -41,7 +41,7 @@ model.add(Conv2D(32, (3,3), padding='same'))
 model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.2))
+#model.add(Dropout(0.2))
  
 model.add(Conv2D(64, (3,3), padding='same'))
 model.add(Activation('relu'))
@@ -50,7 +50,7 @@ model.add(Conv2D(64, (3,3), padding='same'))
 model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.3))
+#model.add(Dropout(0.3))
  
 model.add(Conv2D(128, (3,3), padding='same'))
 model.add(Activation('relu'))
@@ -59,11 +59,11 @@ model.add(Conv2D(128, (3,3), padding='same'))
 model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
-model.add(Dropout(0.3))
+#model.add(Dropout(0.3))
  
 model.add(Flatten())
 model.add(Dense(512, activation='relu'))
-model.add(Dropout(0.3))
+#model.add(Dropout(0.3))
 model.add(Dense(num_classes, activation='softmax'))
  
 model.summary()
@@ -93,7 +93,7 @@ with open('log.pickle', 'wb') as f:
 model_json = model.to_json()
 with open('model.json', 'w') as json_file:
     json_file.write(model_json)
-model.save('model_test.h5') 
+model.save('model_without_dropout.h5') 
  
 #testing
 scores = model.evaluate(x_test, y_test, batch_size=128, verbose=1)
