@@ -8,7 +8,8 @@ from keras.datasets import cifar10
 from keras import regularizers
 from keras.callbacks import LearningRateScheduler
 import numpy as np
- 
+import pickle
+
 def lr_schedule(epoch):
     lrate = 0.001
     if epoch > 75:
@@ -40,7 +41,7 @@ model.add(Conv2D(32, (3,3), padding='same'))
 model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
-#model.add(Dropout(0.2))
+model.add(Dropout(0.2))
  
 model.add(Conv2D(64, (3,3), padding='same'))
 model.add(Activation('relu'))
@@ -56,12 +57,12 @@ model.add(Activation('relu'))
 model.add(BatchNormalization())
 model.add(Conv2D(128, (3,3), padding='same'))
 model.add(Activation('relu'))
-#model.add(BatchNormalization())
+model.add(BatchNormalization())
 model.add(MaxPooling2D(pool_size=(2,2)))
-#model.add(Dropout(0.4))
+model.add(Dropout(0.3))
  
 model.add(Flatten())
-model.add(Dense(1024, activation='relu'))
+model.add(Dense(512, activation='relu'))
 model.add(Dropout(0.3))
 model.add(Dense(num_classes, activation='softmax'))
  
@@ -80,15 +81,21 @@ batch_size = 64
  
 opt_rms = keras.optimizers.rmsprop(lr=0.001,decay=1e-6)
 model.compile(loss='categorical_crossentropy', optimizer=opt_rms, metrics=['accuracy'])
-model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),\
-                    steps_per_epoch=x_train.shape[0] // batch_size,epochs=100,\
+history_callback = model.fit_generator(datagen.flow(x_train, y_train, batch_size=batch_size),\
+                    steps_per_epoch=x_train.shape[0] // batch_size,epochs=150,\
                     verbose=1,validation_data=(x_test,y_test),callbacks=[LearningRateScheduler(lr_schedule)])
-#save to disk
+
+with open('log.pickle', 'wb') as f:
+    pickle.dump(history_callback.history, f)
+    f.close()
+
+
 model_json = model.to_json()
 with open('model.json', 'w') as json_file:
     json_file.write(model_json)
-model.save('model_remove_kernel_re.h5') 
+model.save('model_test.h5') 
  
 #testing
 scores = model.evaluate(x_test, y_test, batch_size=128, verbose=1)
 print('\nTest result: %.3f loss: %.3f' % (scores[1]*100,scores[0]))
+
